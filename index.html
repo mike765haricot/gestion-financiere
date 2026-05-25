@@ -1,0 +1,1010 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CrowdSec - Analyse Financière</title>
+    <!-- FontAwesome pour les icônes -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Rajdhani:wght@500;600;700&display=swap"
+        rel="stylesheet">
+    <style>
+        /* === VARIABLES & RESET === */
+        :root {
+            --bg-color: #03060f;
+            --primary: #00f0ff;
+            --primary-glow: rgba(0, 240, 255, 0.35);
+            --secondary: #7000ff;
+            --secondary-glow: rgba(112, 0, 255, 0.35);
+            --success: #00ff88;
+            --success-glow: rgba(0, 255, 136, 0.35);
+            --text-main: #e2e8f0;
+            --text-muted: #94a3b8;
+            --border-color: rgba(0, 240, 255, 0.15);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Rajdhani', system-ui, -apple-system, sans-serif;
+            font-weight: 500;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            overflow-x: hidden;
+        }
+
+        /* === SCROLLBAR === */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--bg-color);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: rgba(0, 240, 255, 0.15);
+            border-radius: 4px;
+            border: 1px solid rgba(0, 240, 255, 0.05);
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(0, 240, 255, 0.35);
+        }
+
+        /* === BACKGROUND & GRID === */
+        #particle-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            pointer-events: none;
+            opacity: 0.65;
+        }
+
+        .cyber-grid {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background:
+                linear-gradient(rgba(0, 240, 255, 0.015) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 240, 255, 0.015) 1px, transparent 1px);
+            background-size: 50px 50px;
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        .scanline {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 5px;
+            background: linear-gradient(to bottom, transparent, rgba(0, 240, 255, 0.15), transparent);
+            z-index: 99;
+            pointer-events: none;
+            animation: scanline-sweep 12s linear infinite;
+        }
+
+        @keyframes scanline-sweep {
+            0% {
+                transform: translateY(-100vh);
+            }
+
+            100% {
+                transform: translateY(100vh);
+            }
+        }
+
+        /* === TYPOGRAPHY === */
+        .font-orbitron {
+            font-family: 'Orbitron', sans-serif !important;
+        }
+
+        .gradient-text {
+            font-family: 'Orbitron', sans-serif;
+            background: linear-gradient(135deg, #ffffff 10%, var(--primary) 60%, var(--secondary) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 0 30px rgba(0, 240, 255, 0.2);
+        }
+
+        .section-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 2.2rem;
+            font-weight: 800;
+            letter-spacing: 2px;
+            margin-bottom: 3rem;
+            display: flex;
+            align-items: center;
+            gap: 1.2rem;
+            color: #fff;
+            text-shadow: 0 0 15px rgba(0, 240, 255, 0.3);
+            text-transform: uppercase;
+        }
+
+        .section-title::before {
+            content: '';
+            width: 40px;
+            height: 6px;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            box-shadow: 0 0 15px var(--primary);
+            clip-path: polygon(0 0, 100% 0, 80% 100%, 0% 100%);
+        }
+
+        /* === PREMIUM CYBER CARDS === */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 4rem 2rem;
+        }
+
+        .premium-card {
+            background: linear-gradient(145deg, rgba(8, 14, 30, 0.85) 0%, rgba(3, 7, 16, 0.95) 100%);
+            backdrop-filter: blur(20px);
+            border-radius: 12px;
+            padding: 2.5rem;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5), inset 0 0 15px rgba(0, 240, 255, 0.05);
+            transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+            border: 1px solid rgba(0, 240, 255, 0.15);
+        }
+
+        .premium-card::before {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 12px;
+            height: 12px;
+            border-bottom: 2px solid var(--secondary);
+            border-left: 2px solid var(--secondary);
+            pointer-events: none;
+            transition: all 0.3s ease;
+        }
+
+        .premium-card::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 12px;
+            height: 12px;
+            border-top: 2px solid var(--primary);
+            border-right: 2px solid var(--primary);
+            pointer-events: none;
+            transition: all 0.3s ease;
+        }
+
+        .premium-card:hover {
+            transform: translateY(-5px);
+            border-color: rgba(0, 240, 255, 0.45);
+            box-shadow: 0 20px 40px rgba(0, 240, 255, 0.15), inset 0 0 20px rgba(0, 240, 255, 0.08);
+        }
+
+        .premium-card:hover::before,
+        .premium-card:hover::after {
+            width: 25px;
+            height: 25px;
+            filter: drop-shadow(0 0 8px var(--primary));
+        }
+
+        /* === SECTION 1: GRID === */
+        .grid-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 2rem;
+            margin-bottom: 6rem;
+        }
+
+        .icon-box {
+            width: 60px;
+            height: 60px;
+            border-radius: 10px;
+            background: rgba(0, 240, 255, 0.08);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            color: var(--primary);
+            margin-bottom: 1.5rem;
+            border: 1px solid rgba(0, 240, 255, 0.25);
+            box-shadow: 0 0 20px rgba(0, 240, 255, 0.08);
+            transition: all 0.3s ease;
+        }
+
+        .premium-card:hover .icon-box {
+            background: rgba(0, 240, 255, 0.16);
+            border-color: var(--primary);
+            box-shadow: 0 0 25px rgba(0, 240, 255, 0.25);
+            transform: scale(1.05);
+        }
+
+        .tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.4rem 0.8rem;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            letter-spacing: 1px;
+            background: rgba(112, 0, 255, 0.15);
+            color: #c09fff;
+            border: 1px solid rgba(112, 0, 255, 0.3);
+            margin-top: 1.5rem;
+            font-family: 'Orbitron', sans-serif;
+            text-transform: uppercase;
+        }
+
+        /* Cyber stats styled counter dashboard */
+        .cyber-stat {
+            margin-bottom: 1.5rem;
+        }
+
+        .cyber-stat:last-child {
+            margin-bottom: 0;
+        }
+
+        .stat-label {
+            display: block;
+            font-size: 0.75rem;
+            letter-spacing: 2px;
+            color: var(--text-muted);
+            font-weight: 700;
+            text-transform: uppercase;
+            margin-bottom: 0.3rem;
+        }
+
+        .stat-value-container {
+            display: flex;
+            align-items: baseline;
+            gap: 0.5rem;
+            margin-bottom: 0.4rem;
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 800;
+            color: #fff;
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.15);
+        }
+
+        .stat-unit {
+            font-size: 0.8rem;
+            color: var(--primary);
+            font-weight: 700;
+            letter-spacing: 1px;
+        }
+
+        .cyber-progress-bar {
+            width: 100%;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 2px;
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.02);
+        }
+
+        .progress-fill {
+            height: 100%;
+            border-radius: 2px;
+            box-shadow: 0 0 10px currentColor;
+        }
+
+        /* === SECTION 2: IMPLANTATION === */
+        .implantation-wrapper {
+            display: flex;
+            gap: 3rem;
+            align-items: center;
+            margin-bottom: 6rem;
+            flex-wrap: wrap;
+        }
+
+        .map-visual {
+            position: relative;
+            flex: 1;
+            min-width: 320px;
+            height: 320px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(8, 16, 35, 0.9) 30%, rgba(3, 7, 16, 0.95) 75%);
+            border: 2px solid var(--border-color);
+            box-shadow: 0 0 35px rgba(0, 240, 255, 0.1), inset 0 0 45px rgba(0, 240, 255, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        .radar-circle {
+            position: absolute;
+            border: 1px dashed rgba(0, 240, 255, 0.15);
+            border-radius: 50%;
+        }
+
+        .radar-circle-1 {
+            width: 85%;
+            height: 85%;
+        }
+
+        .radar-circle-2 {
+            width: 65%;
+            height: 65%;
+        }
+
+        .radar-circle-3 {
+            width: 45%;
+            height: 45%;
+        }
+
+        .radar-circle-4 {
+            width: 25%;
+            height: 25%;
+        }
+
+        .radar-sweep {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: conic-gradient(from 0deg, rgba(0, 240, 255, 0.15) 0deg, rgba(0, 240, 255, 0.05) 90deg, transparent 180deg);
+            border-radius: 50%;
+            animation: radar-sweep-anim 4s linear infinite;
+            pointer-events: none;
+        }
+
+        @keyframes radar-sweep-anim {
+            from {
+                transform: rotate(0deg);
+            }
+
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .radar-grid-h,
+        .radar-grid-v {
+            position: absolute;
+            background: rgba(0, 240, 255, 0.08);
+        }
+
+        .radar-grid-h {
+            width: 100%;
+            height: 1px;
+        }
+
+        .radar-grid-v {
+            width: 1px;
+            height: 100%;
+        }
+
+        .radar-dot {
+            position: absolute;
+            width: 12px;
+            height: 12px;
+            background: var(--primary);
+            border-radius: 50%;
+            box-shadow: 0 0 15px var(--primary);
+            z-index: 5;
+        }
+
+        .radar-dot::before {
+            content: '';
+            position: absolute;
+            top: -6px;
+            left: -6px;
+            width: 24px;
+            height: 24px;
+            border: 2px solid var(--primary);
+            border-radius: 50%;
+            animation: radar-pulse 1.8s ease-out infinite;
+            opacity: 0;
+        }
+
+        @keyframes radar-pulse {
+            0% {
+                transform: scale(0.5);
+                opacity: 1;
+            }
+
+            100% {
+                transform: scale(2.5);
+                opacity: 0;
+            }
+        }
+
+        .radar-target-info {
+            position: absolute;
+            top: 44%;
+            left: 48%;
+            display: flex;
+            align-items: center;
+            background: rgba(3, 7, 16, 0.9);
+            padding: 4px 10px;
+            border: 1px solid var(--primary);
+            border-radius: 4px;
+            font-size: 0.8rem;
+            pointer-events: none;
+            z-index: 6;
+            box-shadow: 0 0 12px rgba(0, 240, 255, 0.35);
+        }
+
+        .implantation-text {
+            flex: 2;
+            min-width: 320px;
+        }
+
+        /* === SECTION 3: TIMELINE CYBER === */
+        .cyber-timeline {
+            position: relative;
+            padding-left: 4rem;
+        }
+
+        .cyber-timeline::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 14px;
+            width: 4px;
+            height: 100%;
+            background: linear-gradient(to bottom, var(--primary), var(--secondary), transparent);
+            box-shadow: 0 0 10px rgba(0, 240, 255, 0.2);
+            border-radius: 2px;
+        }
+
+        .cyber-timeline::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 14px;
+            width: 4px;
+            height: 60px;
+            background: linear-gradient(to bottom, transparent, #fff, transparent);
+            animation: energy-pulse 6s infinite linear;
+            box-shadow: 0 0 15px #fff;
+            border-radius: 2px;
+        }
+
+        @keyframes energy-pulse {
+            0% {
+                top: 0%;
+            }
+
+            100% {
+                top: 100%;
+            }
+        }
+
+        .timeline-node {
+            position: relative;
+            margin-bottom: 4rem;
+        }
+
+        .node-dot {
+            position: absolute;
+            left: -4rem;
+            top: 1.8rem;
+            width: 32px;
+            height: 32px;
+            background: var(--bg-color);
+            border: 3px solid var(--primary);
+            border-radius: 50%;
+            box-shadow: 0 0 15px var(--primary);
+            z-index: 2;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+
+        .node-dot::after {
+            content: '';
+            width: 10px;
+            height: 10px;
+            background: var(--primary);
+            border-radius: 50%;
+            transition: all 0.3s ease;
+        }
+
+        .timeline-node:hover .node-dot {
+            transform: scale(1.2);
+            border-color: #fff;
+            box-shadow: 0 0 25px var(--primary);
+        }
+
+        .timeline-node:hover .node-dot::after {
+            background: #fff;
+        }
+
+        /* Cyber exit option panels */
+        .cyber-option {
+            flex: 1;
+            min-width: 240px;
+            padding: 1.5rem;
+            background: rgba(6, 11, 25, 0.85);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            transition: all 0.3s cubic-bezier(0.165, 0.84, 0.44, 1);
+            display: flex;
+            flex-direction: column;
+            gap: 0.8rem;
+        }
+
+        .cyber-option.option-a {
+            border-left: 4px solid var(--primary);
+        }
+
+        .cyber-option.option-b {
+            border-left: 4px solid var(--secondary);
+        }
+
+        .cyber-option:hover {
+            background: rgba(12, 22, 48, 0.95);
+            border-color: rgba(0, 240, 255, 0.25);
+            transform: translateY(-2px);
+        }
+
+        .option-header {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            color: #fff;
+        }
+
+        .option-header i {
+            font-size: 1.2rem;
+            color: var(--primary);
+        }
+
+        .cyber-option.option-b .option-header i {
+            color: var(--secondary);
+        }
+
+        .option-header h4 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.1rem;
+            font-weight: 700;
+            letter-spacing: 1px;
+        }
+
+        .cyber-option p {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            line-height: 1.5;
+        }
+
+        .option-status {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.75rem;
+            font-weight: 700;
+            letter-spacing: 1px;
+            color: var(--text-muted);
+            margin-top: auto;
+        }
+
+        .status-indicator {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .status-indicator.active {
+            background: var(--success);
+            box-shadow: 0 0 8px var(--success);
+            animation: blink 1.5s infinite alternate;
+        }
+
+        @keyframes blink {
+            0% {
+                opacity: 0.4;
+            }
+
+            100% {
+                opacity: 1;
+            }
+        }
+
+        /* === ANIMATIONS AU SCROLL === */
+        .reveal {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: 0.8s cubic-bezier(0.165, 0.84, 0.44, 1);
+        }
+
+        .reveal.active {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* === FOOTER SIGNATURE === */
+        .cyber-footer {
+            text-align: center;
+            margin-top: 8rem;
+            padding: 2.5rem 0;
+            border-top: 1px dashed rgba(0, 240, 255, 0.15);
+            opacity: 0.45;
+            transition: all 0.3s cubic-bezier(0.165, 0.84, 0.44, 1);
+        }
+
+        .cyber-footer:hover {
+            opacity: 0.95;
+            border-top-color: rgba(0, 240, 255, 0.35);
+            text-shadow: 0 0 10px rgba(0, 240, 255, 0.2);
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Arrière-plan animé (Particules & Grilles) -->
+    <canvas id="particle-canvas"></canvas>
+    <div class="cyber-grid"></div>
+    <div class="scanline"></div>
+
+    <div class="container">
+
+        <!-- STATUS BAR / LOGISTIQUE PROJET -->
+        <div class="reveal"
+            style="display: flex; justify-content: space-between; align-items: center; padding: 12px 20px; background: rgba(3, 7, 16, 0.85); border: 1px solid rgba(0, 240, 255, 0.15); border-radius: 6px; margin-bottom: 3rem; font-size: 0.8rem; letter-spacing: 2px; text-transform: uppercase; box-shadow: 0 0 15px rgba(0, 240, 255, 0.05);">
+            <div style="display: flex; align-items: center; gap: 8px;">
+                <span class="status-indicator active"></span>
+                <span class="font-orbitron" style="color: var(--text-muted); font-size: 0.75rem;">Format :</span>
+                <span class="font-orbitron" style="color: #fff; font-weight: 700; font-size: 0.75rem;">Projet Fi <span
+                        style="text-decoration: underline; text-underline-offset: 4px; color: var(--primary);">Seul</span>
+                    !</span>
+            </div>
+            <div style="display: flex; align-items: center; gap: 8px;">
+                <i class="fa-solid fa-calendar-check"
+                    style="color: var(--primary); filter: drop-shadow(0 0 5px var(--primary-glow));"></i>
+                <span class="font-orbitron" style="color: var(--text-muted); font-size: 0.75rem;">Limite :</span>
+                <span class="font-orbitron" style="color: #fff; font-weight: 700; font-size: 0.75rem;">Lundi 25 mai
+                    17h07 max</span>
+            </div>
+        </div>
+
+        <!-- HEADER -->
+        <header class="reveal" style="text-align: center; margin-bottom: 5rem;">
+            <div
+                style="display: inline-block; padding: 20px; background: rgba(0,240,255,0.04); border: 1px solid rgba(0,240,255,0.2); border-radius: 50%; margin-bottom: 20px; box-shadow: 0 0 35px rgba(0,240,255,0.15); position: relative;">
+                <i class="fa-solid fa-shield-halved"
+                    style="font-size: 3rem; color: var(--primary); filter: drop-shadow(0 0 10px var(--primary));"></i>
+            </div>
+            <h1 class="gradient-text"
+                style="font-size: 4.5rem; margin-bottom: 10px; font-weight: 900; letter-spacing: 2px;">CrowdSec</h1>
+            <p
+                style="color: var(--text-muted); font-size: 1.2rem; letter-spacing: 2px; font-family: 'Orbitron', sans-serif; text-transform: uppercase;">
+                Analyse Stratégique & Financière</p>
+        </header>
+
+        <!-- ONGLET 1: PRESENTATION -->
+        <div class="reveal">
+            <h2 class="section-title">01. Profil de l'entreprise</h2>
+            <div class="grid-cards">
+
+                <div class="premium-card">
+                    <div class="icon-box"><i class="fa-solid fa-user-tie"></i></div>
+                    <h3 class="font-orbitron"
+                        style="font-size: 1.5rem; margin-bottom: 15px; color: #fff; letter-spacing: 1px;">Gouvernance
+                    </h3>
+                    <p style="color: var(--text-muted); line-height: 1.6; font-size: 1.05rem;">
+                        Fondée par les experts en cybersécurité <strong>Philippe Humeau</strong> (CEO), <strong>Laurent
+                            Soubrevilla</strong> et <strong>Thibault Koechlin</strong>.<br><br>
+                        Soutenue par des fonds de capital-risque de premier plan assurant la solidité financière du
+                        projet.
+                    </p>
+                    <span class="tag"><i class="fa-solid fa-building-columns"></i> Breega & NextStage AM</span>
+                </div>
+
+                <div class="premium-card"
+                    style="border: 1px solid var(--primary); box-shadow: 0 0 25px rgba(0, 240, 255, 0.1);">
+                    <div class="icon-box"
+                        style="color: #fff; background: var(--primary); box-shadow: 0 0 25px var(--primary);"><i
+                            class="fa-solid fa-network-wired"></i></div>
+                    <h3 class="font-orbitron"
+                        style="font-size: 1.5rem; margin-bottom: 15px; color: #fff; letter-spacing: 1px;">La Technologie
+                    </h3>
+                    <p style="color: var(--text-muted); line-height: 1.6; font-size: 1.05rem;">
+                        Un pare-feu <strong>Open-Source collaboratif</strong>. Lorsqu'une IP malveillante attaque un
+                        serveur, elle est bloquée et son profil est instantanément partagé à tout le réseau mondial.
+                    </p>
+                    <span class="tag"
+                        style="background: rgba(0,240,255,0.1); color: var(--primary); border-color: var(--primary);"><i
+                            class="fa-solid fa-bolt"></i> Temps réel</span>
+                </div>
+
+                <div class="premium-card">
+                    <div class="icon-box"><i class="fa-solid fa-chart-line"></i></div>
+                    <h3 class="font-orbitron"
+                        style="font-size: 1.5rem; margin-bottom: 15px; color: #fff; letter-spacing: 1px;">Chiffres Clés
+                    </h3>
+
+                    <div class="cyber-stat">
+                        <span class="stat-label">Effectif</span>
+                        <div class="stat-value-container">
+                            <span class="stat-value font-orbitron">50+</span>
+                            <span class="stat-unit">COLLABORATEURS</span>
+                        </div>
+                        <div class="cyber-progress-bar">
+                            <div class="progress-fill"
+                                style="width: 75%; background: var(--primary); color: var(--primary-glow);"></div>
+                        </div>
+                    </div>
+
+                    <div class="cyber-stat">
+                        <span class="stat-label">Chiffre d'Affaires (CA)</span>
+                        <div class="stat-value-container">
+                            <span class="stat-value font-orbitron">1.8M€</span>
+                            <span class="stat-unit">ARR ESTIMÉ</span>
+                        </div>
+                        <div class="cyber-progress-bar">
+                            <div class="progress-fill"
+                                style="width: 80%; background: #ffaa00; box-shadow: 0 0 10px rgba(255, 170, 0, 0.45);">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="cyber-stat">
+                        <span class="stat-label">Financement</span>
+                        <div class="stat-value-container">
+                            <span class="stat-value font-orbitron">5M€</span>
+                            <span class="stat-unit">LEVÉE DE FONDS</span>
+                        </div>
+                        <div class="cyber-progress-bar">
+                            <div class="progress-fill"
+                                style="width: 90%; background: var(--secondary); color: var(--secondary-glow);"></div>
+                        </div>
+                    </div>
+
+                    <div class="cyber-stat">
+                        <span class="stat-label">Business Model</span>
+                        <div class="stat-value-container">
+                            <span class="stat-value font-orbitron">SaaS</span>
+                            <span class="stat-unit">FREEMIUM / B2B</span>
+                        </div>
+                        <div class="cyber-progress-bar">
+                            <div class="progress-fill"
+                                style="width: 65%; background: var(--success); color: var(--success-glow);"></div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- ONGLET 2: IMPLANTATION -->
+        <div class="reveal">
+            <h2 class="section-title">02. Stratégie d'Implantation</h2>
+            <div class="premium-card implantation-wrapper">
+                <div class="map-visual">
+                    <div class="radar-sweep"></div>
+                    <div class="radar-circle radar-circle-1"></div>
+                    <div class="radar-circle radar-circle-2"></div>
+                    <div class="radar-circle radar-circle-3"></div>
+                    <div class="radar-circle radar-circle-4"></div>
+                    <div class="radar-grid-h"></div>
+                    <div class="radar-grid-v"></div>
+                    <div class="radar-dot" style="top: 38%; left: 45%;"></div>
+                    <div class="radar-target-info">
+                        <i class="fa-solid fa-crosshairs"
+                            style="color: var(--primary); font-size: 1.1rem; filter: drop-shadow(0 0 5px var(--primary));"></i>
+                        <span
+                            style="font-family: 'Orbitron', sans-serif; font-size: 0.85rem; color: #fff; margin-left: 6px; font-weight: 700; letter-spacing: 1px;">PARIS_TARGET</span>
+                    </div>
+                </div>
+                <div class="implantation-text">
+                    <h3 class="font-orbitron"
+                        style="font-size: 2rem; margin-bottom: 1.5rem; color: #fff; letter-spacing: 1px;">L'Argument de
+                        la Souveraineté</h3>
+                    <p style="color: var(--text-muted); line-height: 1.8; font-size: 1.15rem; margin-bottom: 1.5rem;">
+                        S'implanter en France permet un accès direct au bassin de talents du <strong>Campus
+                            Cyber</strong> européen.
+                    </p>
+                    <p style="color: var(--text-muted); line-height: 1.8; font-size: 1.15rem;">
+                        Mais c'est avant tout un choix financier stratégique : garantir une <strong>conformité
+                            RGPD</strong> stricte et échapper au Cloud Act américain. Cet argument de confiance est
+                        vital pour vendre la solution aux banques et ministères européens.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- ONGLET 3: PLAN DE DEVELOPPEMENT -->
+        <div class="reveal">
+            <h2 class="section-title">03. Plan de Développement</h2>
+            <div class="cyber-timeline">
+
+                <div class="timeline-node">
+                    <div class="node-dot"></div>
+                    <div class="premium-card">
+                        <span class="font-orbitron"
+                            style="color: var(--primary); font-weight: bold; letter-spacing: 2px; text-transform: uppercase; font-size: 0.85rem;">Horizon
+                            2 Ans</span>
+                        <h3 class="font-orbitron"
+                            style="font-size: 1.8rem; margin: 10px 0; color: #fff; letter-spacing: 1px;">Détection IA &
+                            Prédictif</h3>
+                        <p style="color: var(--text-muted); line-height: 1.6; font-size: 1.05rem;">
+                            Déploiement de modèles de Machine Learning directement dans l'agent local pour détecter les
+                            attaques inédites (Zero-Day) avant même qu'elles ne soient répertoriées.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="timeline-node">
+                    <div class="node-dot" style="border-color: #b985ff; box-shadow: 0 0 15px #b985ff;"></div>
+                    <div class="premium-card">
+                        <span class="font-orbitron"
+                            style="color: #b985ff; font-weight: bold; letter-spacing: 2px; text-transform: uppercase; font-size: 0.85rem;">Horizon
+                            5 Ans</span>
+                        <h3 class="font-orbitron"
+                            style="font-size: 1.8rem; margin: 10px 0; color: #fff; letter-spacing: 1px;">Gamme
+                            "Compliance"</h3>
+                        <p style="color: var(--text-muted); line-height: 1.6; font-size: 1.05rem;">
+                            Lancement de la "Prod 2" ciblant spécifiquement les normes européennes (NIS 2 & DORA).
+                            Automatisation des rapports de conformité pour s'imposer sur le marché lucratif du secteur
+                            bancaire.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="timeline-node">
+                    <div class="node-dot" style="border-color: #fff; box-shadow: 0 0 15px #fff;"></div>
+                    <div class="premium-card"
+                        style="background: linear-gradient(145deg, rgba(112, 0, 255, 0.15) 0%, rgba(5, 9, 20, 0.95) 100%); border-color: rgba(112, 0, 255, 0.3);">
+                        <span class="font-orbitron"
+                            style="color: #fff; font-weight: bold; letter-spacing: 2px; text-transform: uppercase; font-size: 0.85rem;">Horizon
+                            10 Ans</span>
+                        <h3 class="font-orbitron"
+                            style="font-size: 1.8rem; margin: 10px 0; color: #fff; letter-spacing: 1px;">Stratégie de
+                            Liquidité (Exit)</h3>
+                        <p
+                            style="color: var(--text-muted); line-height: 1.6; margin-bottom: 1.5rem; font-size: 1.05rem;">
+                            Pour assurer le retour sur investissement des fonds, deux scénarios de sortie sont
+                            privilégiés :
+                        </p>
+
+                        <div style="display: flex; gap: 1.5rem; flex-wrap: wrap;">
+                            <div class="cyber-option option-a">
+                                <div class="option-header">
+                                    <i class="fa-solid fa-arrow-trend-up"></i>
+                                    <h4>OPTION A: IPO</h4>
+                                </div>
+                                <p>Introduction en Bourse sur Euronext Paris.</p>
+                                <div class="option-status">
+                                    <span class="status-indicator active"></span>
+                                    <span>SCÉNARIO PRIVILÉGIÉ</span>
+                                </div>
+                            </div>
+                            <div class="cyber-option option-b">
+                                <div class="option-header">
+                                    <i class="fa-solid fa-handshake"></i>
+                                    <h4>OPTION B: RACHAT</h4>
+                                </div>
+                                <p>Acquisition stratégique par un leader du marché (Cisco, Cloudflare).</p>
+                                <div class="option-status">
+                                    <span class="status-indicator"></span>
+                                    <span>ALTERNATIVE STRATÉGIQUE</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- FOOTER / SIGNATURE -->
+        <footer class="reveal cyber-footer">
+            <p style="font-size: 0.85rem; letter-spacing: 3px; text-transform: uppercase; margin: 0;">
+                <span class="font-orbitron" style="color: var(--text-muted);">Sec-Operator //</span>
+                <span class="font-orbitron"
+                    style="color: var(--primary); text-shadow: 0 0 8px var(--primary-glow); font-weight: 700;">DAYAWA
+                    Germain Mike</span>
+            </p>
+        </footer>
+
+    </div>
+    <script>
+        // Animations au scroll
+        function reveal() {
+            var reveals = document.querySelectorAll(".reveal");
+            for (var i = 0; i < reveals.length; i++) {
+                var windowHeight = window.innerHeight;
+                var elementTop = reveals[i].getBoundingClientRect().top;
+                if (elementTop < windowHeight - 100) { reveals[i].classList.add("active"); }
+            }
+        }
+        window.addEventListener("scroll", reveal);
+        reveal();
+
+        // Canvas Code Rain Matrix Cyber
+        const canvas = document.getElementById('particle-canvas');
+        const ctx = canvas.getContext('2d');
+
+        let width = canvas.width = window.innerWidth;
+        let height = canvas.height = window.innerHeight;
+
+        const fontSpace = 20;
+        const columns = Math.floor(width / fontSpace) + 1;
+        const yPositions = Array(columns).fill(0);
+
+        // Initialisation avec décalages pour éviter que toutes les colonnes partent en même temps
+        for (let i = 0; i < columns; i++) {
+            yPositions[i] = Math.random() * -height;
+        }
+
+        // Alphabet de cryptage & CrowdSec
+        const chars = "01CROWDSECSECURITY0123456789ABCDEF[]{}<>#@*+_-$%&Ø".split("");
+
+        function drawMatrix() {
+            // Effet de trainée transparent (fond très sombre)
+            ctx.fillStyle = 'rgba(3, 6, 15, 0.08)';
+            ctx.fillRect(0, 0, width, height);
+
+            ctx.font = '600 13px "Orbitron", monospace';
+
+            for (let i = 0; i < yPositions.length; i++) {
+                const char = chars[Math.floor(Math.random() * chars.length)];
+                const x = i * fontSpace;
+                const y = yPositions[i];
+
+                // Couleur aléatoire : tête de ligne blanche, corps cyan, accents violets
+                const colorChance = Math.random();
+                if (colorChance < 0.03) {
+                    ctx.fillStyle = '#ffffff'; // Tête de ligne lumineuse
+                } else if (colorChance < 0.18) {
+                    ctx.fillStyle = '#7000ff'; // Violet/Purple accent
+                } else {
+                    ctx.fillStyle = 'rgba(0, 240, 255, 0.85)'; // Cyan standard
+                }
+
+                ctx.fillText(char, x, y);
+
+                // Réinitialise la ligne en haut de l'écran de manière asynchrone si elle dépasse
+                if (y > height && Math.random() > 0.98) {
+                    yPositions[i] = 0;
+                } else {
+                    yPositions[i] += 14; // Vitesse de chute
+                }
+            }
+        }
+
+        function animate() {
+            drawMatrix();
+            setTimeout(() => {
+                requestAnimationFrame(animate);
+            }, 33); // ~30 fps pour un effet fluide sans surcharger le CPU
+        }
+
+        window.addEventListener('resize', function () {
+            width = canvas.width = window.innerWidth;
+            height = canvas.height = window.innerHeight;
+            const newCols = Math.floor(width / fontSpace) + 1;
+            while (yPositions.length < newCols) {
+                yPositions.push(Math.random() * -height);
+            }
+            if (yPositions.length > newCols) {
+                yPositions.length = newCols;
+            }
+        });
+
+        animate();
+    </script>
+</body>
+
+</html>

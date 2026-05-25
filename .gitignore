@@ -1,0 +1,8 @@
+.vercel/
+.gemini/
+*.webp
+*.png
+.tempmediaStorage/
+task.md.metadata.json
+walkthrough.md.metadata.json
+implementation_plan.md.metadata.json
